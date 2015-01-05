@@ -1,0 +1,173 @@
+------------------------------------------
+//question
+只有一个客户端，服务器单线程一次接受5个字节，客户端一次发送9个byteepoll_wait能返回几个有效struct epoll_event
+******************************************
+//code
+//events是个长度为10的数组
+nfds = epoll_wait(epollfd, events, 10, -1);
+for(int i = 0;i < nfds;++i) {
+	ret = recv(events[i].data.fd, rbuf, 5,0);
+}
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//output
+epoll_wait一次只返回一个有效struct epoll_event
+
+
+------------------------------------------
+//question
+开启两个线程，当线程出现当一个线程的epoll_wait返回后恰好切换另一线程，两线程返回的fd都相同，那么会有什么问题，数据会不会错位
+******************************************
+//code
+	nfds = epoll_wait(epollfd, events, 10, -1);
+	if(nfds == -1) {
+		printf("!!!!epoll_wait err %d %s\n",errno,strerror(errno));
+		continue;
+		//exit(0);
+	}
+	printf("th1 have %d\n",nfds);
+	sleep(2);//线程切换
+
+	ret = recv(events[i].data.fd, rbuf, 5,0);
+	printf("th1 recv data %d\n",ret);
+	//sleep(1);
+	if(ret == -1) {
+		printf("th1 error recv %d %s\n",errno,strerror(errno));
+		if(errno == 11) {
+			continue;
+		}
+		
+		close(events[i].data.fd);//错误码 104
+		//exit(0);
+		return 0;
+	}
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//output
+root@fnc:TMSxx# ./release/download.elf 
+pid 4970
+tid 3078153920 b778e6c0
+ep_initface
+run server listen:3 0.0.0.0:6000
+ep_CreateThread()
+	create thread count 4
+pthread id 3078150976
+ep_CreateThread()
+	create thread count 4
+pthread id 3069758272
+  help        	shell help
+  null        	shell help
+  hostname    	set hostname
+  server      	run server
+  connect     	connect server
+  cwt         	create work thread
+  dwt         	destory work thread
+  inf         	list server information
+  tfile       	debug only transfer file
+  workqueue   	work queue
+MiniShell>pid 4970 work thread  id 3069758272
+sddf
+accept Success
+clientfd 0
+addr     0.0.0.0
+port     0
+pid 4970 work thread  id 3078150976
+sddf
+accept Success
+clientfd 0
+addr     0.0.0.0
+port     0
+th1 have 1
+th2 have 1
+enfd3 clientfd 0 listenfd 3
+th1 listen sock
+accept 0 Success
+clientfd 6
+addr     192.168.1.52
+port     1574
+th2 enfd3 clientfd 6 listenfd 3
+th2 listen sock
+th2 accept 11 Resource temporarily unavailable
+th2 have 1
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 ABCDE
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 FGHIJ
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 KLMNO
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 PQRST
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 UVWXY
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 ZABCD
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 EFGHI
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 JKLMN
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 OPQRS
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 TUVWX
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 YZABC
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 DEFGH
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 IJKLM
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 5
+th1 ret 5 NOPQR
+th1 have 1
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data 5
+th2 ret 5 STUVW
+th2 have 1
+enfd6 clientfd 6 listenfd 3
+th1 recv data 3
+th1 ret 3 XYZ
+th2 enfd6 clientfd 6 listenfd 3
+th2 recv data -1
+th2 error recv 11 Resource temporarily unavailable
+
+
+------------------------------------------
+//question
+连续两次server run返回值
+20150314
+******************************************
+//code
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//output
+
+Run server listening at: 0.0.0.0:6000
+ep_AddClient: Transport endpoint is not connected
+ep_AddEvent: Transport endpoint is not connected
+ep_listen: Transport endpoint is not connected
+MiniShell>

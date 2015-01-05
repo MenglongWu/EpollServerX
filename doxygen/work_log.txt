@@ -1,0 +1,359 @@
+/*! \page workhis work
+2015-06-012:
+	- fix :
+	\code{.cpp}
+  class Cpp {
+	void main()
+	{
+		printf();
+		int a;
+	}
+  };
+  \endcode
+
+
+
+
+2015-06-04:
+	- add struct trace_cache
+	- add 命令 im level
+	- add 隐藏命令 im del trace
+	- add disp inf，输入 struct trace_cache 参数
+	- 修改 DispFrame，添加 struct trace_cache 参数
+	- 管理员通过im trace、struct trace_cache 得到4412控制权限，方便调试维护
+	- 后期修改sh_analyse的命令回调函数接口，由原来的int (*fun)(int argc,char **argv);
+		改成int (*fun)(int argc,char **argv, void *ptr);这样可以将tms协议里的fd添加到ptr
+		里，然后删除 tms_GetTempFd 接口，鉴于现在命令函数已经存在很多，修改起来麻烦，
+		后期基本成型后再处理它
+
+2015-06-03:
+	- add tms_GetTempFd 控制台用于获取当前通信fd
+	- add 命令 im trace
+	- add 隐藏命令 im add trace
+
+2015-06-01:
+	- 测试通过 tmsdb_Delete_otdr_his_data
+	- 测试通过 tmsdb_Delete_osw_cyc
+	- 测试通过 tmsdb_Insert_osw_cyc
+	- 测试通过 tmsdb_Insert_otdr_rollcall
+	- 测试通过 tmsdb_Insert_otdr_his_data
+	- 测试通过 tmsdb_Insert_sms
+	- 测试通过 tmsdb_Select_sms
+	- 测试通过 tmsdb_Delete_sms
+	- 测试通过 tmsdb_Insert_tb_sn
+	- 测试通过 tmsdb_Select_tb_sn
+	- 测试通过 tmsdb_Delete_tb_sn
+	- 修改数据库，为大多数表加入自增字段id\n
+		tb_common 				\n
+		tb_composition 			\n
+		tb_dev_map				\n
+		tb_any_unit_osw			\n
+		tb_osw_cyc				\n
+		tb_otdr_rollcall		\n
+		tb_otdr_ref				\n
+	- <h3>数据库操作全部完成，耗时6工作日，代码量包含tmsxxdb.c、cmd_tmsxx.c如下函数
+		cmd_sql、
+		_cb_Select_commom、
+		_cb_Select_otdr_rollcall、
+		_cb_Select_otdr_ref、
+		_cb_Select_otdr_his_data、
+		cmd_select、
+		cmd_install、
+		cmd_delete</h3>
+
+	W:等待测试 wait test P:测试通过 Pass
+	|     table         |     select        |      delete    |    insert   
+	| :------------:    | :---------------: | :------------: | :------------
+	|	tb_common 		| 		Pass		|	Pass		 |		Pass	|
+	|	tb_sn 			| 		Pass		|	Pass		 |		Pass	|
+	|	tb_sms 			| 		Pass		|	Pass		 |		Pass	|
+	|	tb_composition 	| 		Pass		|	Pass		 |		Pass	|
+	|	tb_dev_map 		| 		Pass		|	Pass		 |		Pass	|
+	|	tb_any_unit_osw | 		Pass		|	Pass		 |		Pass	|
+	|	tb_osw_cyc 		| 		Pass		|	Pass		 |		Pass	|
+	|	tb_otdr_rollcall| 		Pass		|	Pass		 |		Pass	|
+	|	tb_otdr_ref 	| 		Pass		|	Pass		 |		Pass	|
+	|	tb_otdr_his_data| 		Pass		|	Pass		 |		Pass	|
+
+
+2015-06-01:
+	- add tms_Print_tms_getotdr_test_hdr
+	- add tms_Print_tms_otdr_ref_hdr
+	- 测试通过 tmsdb_Select_otdr_ref
+	- 测试通过 tmsdb_Select_otdr_his_data
+	- 测试通过 tmsdb_Select_otdr_rollcall
+
+	- 测试通过 tmsdb_Delete_otdr_rollcall
+	- 测试通过 tmsdb_Delete_otdr_ref
+	- 测试通过 tmsdb_Select_osw_cyc
+	- 当某些列（INT类型）是NULL时，sqlite3_get_table 返回的dbResult对应列是NULL，此时atoi(dbResult[i])将会错误
+		需要过滤，sqlite3_step返回值就不是那样，只有blob列为NULL才返回NULL，其他如INT列为NULL时返回0；当然这个0
+		是用sqlite3_column_int取得的
+	
+	W:等待测试 wait test P:测试通过 Pass
+	|     table         |     select        |      delete    |    insert   
+	| :------------:    | :---------------: | :------------: | :------------
+	|	tb_common 		| 		Pass		|	Pass		 |		Pass	|
+	|	tb_sn 			| 					|	Wait		 |				|
+	|	tb_sms 			| 					|	Wait		 |				|
+	|	tb_composition 	| 		Pass		|	Pass		 |		Pass	|
+	|	tb_dev_map 		| 		Pass		|	Pass		 |		Pass	|
+	|	tb_any_unit_osw | 		Pass		|	Pass		 |		Pass	|
+	|	tb_osw_cyc 		| 		Pass		|	Wait		 |				|
+	|	tb_otdr_rollcall| 		Pass		|	Pass		 |				|
+	|	tb_otdr_ref 	| 		Pass		|	Pass		 |		Pass	|
+	|	tb_otdr_his_data| 		Pass		|	Wait		 |				|
+
+2015-05-30:
+	- warning snprintf 在linux下返回值是输入参数长度，不是成功写入长度，但它永远
+		不会造成程序崩溃\n
+		windows下有 _snprintf 返回值小于0表示写入长度不足，当使用printf输出时
+		会造成末端非'\0'而溢出\n
+		windows下也有 _sprintf_s 功能和snprintf也有差异，不过相对安全，只不过调用参数多了一个\n
+		计划在 osnet 环境下写兼容函数
+
+2015-05-29:
+	- add tb_common 专门用于存放二进制数据。文金朝希望用它的数据结构存储，而我不知道他的数据结构
+		于是衍生出这张表
+	- 测试通过 tmsdb_Insert_common
+	- 测试通过 tmsdb_Insert_composition
+	- 测试通过 tmsdb_Insert_dev_map
+	- 测试通过 tmsdb_Insert_any_unit_osw
+	- 测试通过 tmsdb_Insert_otdr_ref
+	
+	- 测试通过 tmsdb_Select_common
+	- 测试通过 tmsdb_Select_composition
+	- 测试通过 tmsdb_Select_dev_map
+	- 测试通过 tmsdb_Select_any_unit_osw
+	
+	- 测试通过 tmsdb_Delete_common
+	- 测试通过 tmsdb_Delete_composition
+	- 测试通过 tmsdb_Delete_dev_map
+	- 测试通过 tmsdb_Delete_any_unit_osw
+	- 所有数据表的 delete 方法已经写了通用函数_tmsdb_Delete_any，其他还没测试
+
+	W:等待测试 wait test P:测试通过 Pass
+	|     table         |     select        |      delete    |    insert   
+	| :------------:    | :---------------: | :------------: | :------------
+	|	tb_common 		| 		Pass		|		Pass	 |		Pass	|
+	|	tb_sn 			| 					|		Wait	 |				|
+	|	tb_sms 			| 					|		Wait	 |				|
+	|	tb_composition 	| 		Pass		|		Pass	 |		Pass	|
+	|	tb_dev_map 		| 		Pass		|		Pass	 |		Pass	|
+	|	tb_any_unit_osw | 		Pass		|		Pass	 |		Pass	|
+	|	tb_osw_cyc 		| 					|		Wait	 |				|
+	|	tb_otdr_rollcall| 					|		Pass	 |				|
+	|	tb_otdr_ref 	| 					|		Wait	 |		Pass	|
+	|	tb_otdr_his_data| 					|		Wait	 |				|
+2015-05-27:
+	- add tmsdb_CheckDb 创建TMSxx数据库
+	- 操作tmsxx.b的tb_composition表，tmsdb_Insert_composition
+	- 操作tmsxx.b的tb_composition表，tmsdb_Select_composition
+	- 操作tmsxx.b的tb_composition表，tmsdb_Delete_composition
+	- 在命令行里添加cmd_select,cmd_insert,cmd_delete三个命令测试上面的函数
+	- <h3>发布doxygen帮助文档</h3>	
+2015-05-26:
+	- 基本了解sqlite3的数据库操作方法、数据能使用的数据结构，BOLB存储二进制、
+	CHAR存储定长数据（效率高）、VARCHAR（存储变长数据）、NCHAR/NVARCHAR存储中文
+	免于某些符号错误\n
+	- 参考\n
+		官方在线文档，csdn有chm版下载\n
+		http://www.sqlite.org/docs.html \n
+		sqlite的几个常用方法\n
+		http://blog.csdn.net/zhuzhihai1988/article/details/7878093 \n
+		二进制数据的存储，SQLITE3 使用总结（3～5）(转)\n
+		http://www.cnblogs.com/NewJourney/archive/2011/12/28/2304924.html \n
+	- 编写《sqlite3数据库设计.xlsx》
+
+2015-05-23:
+	- add readline 实现命令提示算法，该功能函数添加到 minishell
+
+2015-05-21:
+	- 测试如下命令
+		- ok   pc  --> dev 0x60000004	工控板查询某槽位上OPM或OLP模块总的光功率告警
+		- ok   mcu <-- dev 0x80000028	MCU上报某槽位总的光功率告警 回应上条
+		- [作废]pc  <-- dev 0x60000006	OLP模块向工控机请求OTDR测试
+		- ok   pc  --> dev 0x60000007	工控板通知OLP模块OTDR测试开始
+		- ok   pc  --> dev 0x60000008	工控板通知OLP模块OTDR测试完成
+		- --   pc  --> mcu 0x80000009	网管发送OLP模块各光端口关联光缆信息到MCU
+		- --   pc  -x> mcu 0x80000010	网管发送清除OLP模块各光端口关联光缆信息到MCU
+		- --   pc  --> mcu 0x80000013	网管发送OLP模块光端口与OSW模块光端口联动关系到MCU
+		- --   pc  -x> mcu 0x80000014	网管发送清除OLP模块光端口与OSW模块光端口联动关系到MCU
+		- ok   pc  -x> mcu 0x80000018	网管发送OLP模块各光端口关联光缆的光功率及告警门限到MCU
+		- ok   mcu --> dev 0x80000019	网管查询OLP模块各光端口当前功率
+		- --   mcu --> dev 0x80000020	MCU返回OLP模块各光端口当前功率
+		- ok   mcu --> dev 0x80000025	网管对OLP模块的工作模式和返回时间设定
+		- ok   mcu --> dev 0x80000026	网管对OLP模块的指令倒换命令
+		- ok   pc  <-- mcu 0x80000027	MCU(OLP)上报OLP人工切换或自动切换的动作信息
+		-      pc  <-- mcu 0x80000029	MCU(OLP)上报某槽位变化的光功率告警
+
+	- 0x80000029
+		- 命令OLP发送的太频繁，需要OLP自身优化
+		- 有复位现象
+	- cf_howline 显示文件某行
+		
+
+2015-05-20:
+	- 解决开发板上retotdr命令内存溢出问题，原因由于计算字4节数时候tms_OTDRConv_tms_retotdr_test_param函数用的是sizeof (struct tms_retotdr_test_param)，改成sizeof (struct tms_retotdr_test_param) / sizeof(int32_t)即可
+	- pf_OnCfgOTDRRef
+	- pf_OnRetOTDRTest
+	- 整合所有OTDR发送接收代码
+	- <h3>发布doxygen帮助文档</h3>
+	
+2015-05-19:
+	- tms_AnalyseCUNoteNet 回调函数 tms_OnCUNoteNet
+	- tms_AnalyseCUNoteManageConnect 回调函数 tms_OnCUNoteManageConnect
+	- tms_AnalyseCfgMCUOSWCycle
+	- tms_CfgOTDRRef
+	- tms_AnalyseCfgOTDRRef
+	- 明天完成OTDR线路告警 0x80000030
+	- 明天把在线升级调试好，TMSxx解析发送部分就算做完了（以MCU的角度）以后做网管只用重新编写回调函数pf_Onxxx即可
+
+2015-05-18:
+	- 修订：回调函数copy2use、tms_analyse也调用copy2use
+	- <h3>发布doxygen帮助文档</h3>
+2015-05-16:
+	- 修订：<h3>所有TMSxx发送接口添加源地址、目的地址接口，如tms_Ack(int fd)改成tms_Ack(int fd, struct glink_addr *addr),
+	如果指针为NULL则tms_Ack填入缺省的，但不保证该包能对方正确接收</h3>
+
+2015-05-15:
+	- 解决与CU通信发送过快导致CU复位
+2015-05-13:
+	- 网管-->CU-->MCU方向ID_TRACEx、ID_COMMAMD通过\n
+	MCU-->CU-->网管方向方向ID_TRACEx、ID_COMMAMD调试遇到问题，也解决了，MCU->网管属于
+	1对多，且不属于应答命令，CU不知道发给谁，后来CU将该命令看待成“告警”主动上报及解决
+
+2015-05-12:
+	- 修订：TMS解析后需要将某些命令ID的帧拷贝命令码、数据长度、数据包内容，以前疏忽只拷贝数据包内容，现已修订
+	- tms_AnalyseMCUtoDevice 内部使用
+	- <h3>tms_AnalyseCfgSMSAuthorization 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseClearSMSAuthorization 数据已经传递给QT界面，文金朝需要处理</h3>
+	- tms_AnalyseCfgMCUAnyPort 内部使用
+	- <h3>tms_AnalyseCfgMCUOLPPort 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseCfgMCUOSWPort 数据已经传递给QT界面，文金朝需要处理</h3>
+	- tms_AnalyseCfgMCUAnyPortClear 内部使用
+	- <h3>tms_AnalyseCfgMCUOPMPortClear 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseCfgMCUOLPPortClear 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseCfgMCUUniteOPMOSWClear 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseCfgMCUUniteOLPOSWClear 数据已经传递给QT界面，文金朝需要处理</h3>
+	- tms_AnalyseCfgAnyRefLevel 内部使用
+	- <h3>tms_AnalyseCfgOLPRefLevel 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseCfgOPMRefLevel 数据已经传递给QT界面，文金朝需要处理</h3>
+	- tms_AnalyseCfgMCUUniteAnyOSW 内部使用
+	- <h3>tms_AnalyseCfgMCUUniteOPMOSW 数据已经传递给QT界面，文金朝需要处理</h3>
+	- <h3>tms_AnalyseCfgMCUUniteOLPOSW 数据已经传递给QT界面，文金朝需要处理</h3>
+	- tms_AnalyseCfgOSWMode MCU直接转发到业务板
+	- tms_MCU_AnalyseOLPSwitch MCU直接转发到业务板
+	- <h3>tms_AnalyseSendSMS  MCU直接转发到业务板，同时文金朝需要处理</h3>
+	- <h3>tms_AnalyseRetSMSError MCU直接转发到网管，同时文金朝需要处理</h3>
+	- tms_AnalyseMCU_OLPReqOTDRTest
+
+2015-05-11:
+	- 修订：
+		int32_t tms_GetOTDRTest(int fd,int32_t frame,int32_t slot,int32_t type,int32_t port,struct tms_getotdr_test_param *val);
+		改成
+		int32_t tms_GetOTDRTest(int fd,int32_t frame,int32_t slot,int32_t port,struct tms_getotdr_test_param *val);
+	- ADD：添加编译选项DEV=M，make DEV=M可以编译成网管
+	- 修订：tms_AnalyseTick改成根据源地址确定是否应答，否则可能引起自循环
+
+2015-05-08:
+	- 完成OTDR曲线测试指令
+	- <h3>NEW：宏CHECK_PTR检查指针合法性，防止远端发送的数据封装错误导致本地接收解析错误，内存溢出</h3>
+	- <h3>NEW：OTDR测试函数tms_GetOTDRTest</h3>
+	- <h3>发布doxygen帮助文档</h3>
+
+2015-05-07:
+	- 与SMS模块调试完成，需要注意的是wchar_t默认是4字节，需要编译选项-fshort-wchar，转换成2字节，
+	wchar_t采用的是utf-16编码，char如果输入中文采用的是utf-8编码（MBCS）
+	- 参考http://blog.csdn.net/softman11/article/details/6124345
+	- <h3>QT自带的编译器无wchar_t，所以源码里将其改成unsigned short，或者在源代码tmsxx.h里加入头文件#include <stdlib.h>，gcc自带wchar_t类型，</h3>
+	- <h3>NEW：短信测试函数tms_SendSMS</h3>
+	- <h3>NEW：OSW测试函数tms_MCU_OSWSwitch</h3>
+	- 完善《命令解析函数表.xlsx》添加“命令处理方式”列，为适应移植到不同设备
+	- NEW：tms_SetDoWhat根据设备在TMSxx网络所处位置不同，设置不同回调处理方式
+
+
+2015-05-06:
+	- NEW：网络调试指令，ID_TRACE0~3用于代替printf、ID_COMMAND用于网管向设备发起命令行
+	- <h3>tms_Trace发送ID_TRACE0~3调试信息</h3>
+	- NEW：网管识别列表，开设CU连接监控线程，当CU断开后反复连接，不过任意连接断开后都需要检测该连接是否是网管连接，浪费运行时间（虽然网管数也就几个）
+	- NEW：cu自动连接线程，在ThreadRunServerAndShell函数里启动它
+	- BUG 发现efence的一个缺陷，创建epollserver线程后虽然连接成功，CU连接线程连接成功，但efence崩溃
+
+2015-05-05:
+	- ID_RET_OTDR_TEST
+
+2015-05-04:
+	- 完成ID_GET_OTDR_TEST、ID_REPORT_OLP_ACTION、ID_CMD_OLP_SWITCH封装自行查阅相关函数
+	- <h3>NEW：OLP测试函数tms_MCU_OLPSwitch 只保证封装正确，暂时没有设备测试</h3>
+
+2015-04-30:
+	- 编写TMSxx函数接口文档注释，doxygen生成
+	- <h3>发布doxygen帮助文档</h3>
+
+2015-04-29:
+	- 移植TMSxx到4412，并交叉编译libtermcap.so库
+
+2015-04-29:
+	- 移植TMSxx到QT应用程序
+
+2015-04-28:
+	- 编写《TMSxx调试控制台移植到QT步骤.doc》
+
+2015-04-27:
+	- ID_RET_OLP_OP、ID_RET_OLP_OP
+	- 整合ID_CFG_OPM_REF_LEVEL、ID_CFG_OLP_REF_LEVEL
+	- ID_GET_DEVTYPE
+
+2015-04-26:
+	- 编辑《命令解析函数表.xlsx》
+	- 完成封装ID_CFG_MCU_OSW_CYCLE、ID_CFG_OLP_MODE、
+ID_CFG_MCU_OSW_PORT、
+ID_CFG_MCU_OSW_PORT_CLEAR、
+ID_CFG_MCU_OLP_PORT	、
+ID_CFG_MCU_OLP_PORT_CLEAR、
+ID_CFG_MCU_U_OPM_OSW、
+ID_CFG_MCU_U_OPM_OSW_CLEAR、
+ID_CFG_MCU_U_OLP_OSW、
+ID_CFG_MCU_U_OLP_OSW_CLEAR
+	- BUG 功能板在热插拔容易IP地址线配置错误，因为功能板启动太快所致，启动后稍作延时再读取地址线即可解决
+
+
+2015-04-25:
+	- 编辑《命令解析函数表.xlsx》
+	- 完成封装ID_CMD_SMS_TEXT、ID_CMD_SMS_ERROR、ID_CFG_SMS、ID_CFG_SMS_CLEAR
+
+
+2015-04-17:
+	- 更新minishell_core，NEW：sh_editpath
+	- NEW：int命令、disp frame命令
+	- 插入其他槽位，仍然检测到插入槽位1，因为热插拔开机后所有引脚没有接触好，电源管脚和地址1管脚在同一侧，导致地址冲突
+
+2015-04-16:
+	- 刚开始与OPM联调，解决14日所有协议
+
+2015-04-15:
+	- 刚开始与OPM联调，大部分命令解决，存在某些板卡更换交换机网络不稳定
+
+2015-04-14:
+	- 主要完成MCU与OPM的通信
+	- 查询版本号ID_GET_VERSION、ID_RET_VERSION
+	- 在线升级ID_UPDATE、ID_CMD_ACK
+	- 返回设备类型信息ID_RET_DEVTYPE（之前已经完成）
+	- 设置参考光功率与告警门限ID_CFG_OPM_REF_LEVEL
+	- 查询各光端口当前功率ID_GET_OPM_OP、ID_RET_OPM_OP
+	-上报光功率告警ID_GET_OPM_OLP_RAYPOWER（之前已完成）
+
+
+
+2015-04-13:
+	- 完成glink_FindFrame函数
+	- 基本完成epFUI_OnRecv，正在提升效率，修订bipbuffer.c
+	- missing 记得处理epFUI_OnRecv函数里当bipbuffer已经满了以后，不能再次recv，也就不能识别远端关闭
+
+2015-04-7~10:
+	- 休息一周
+
+2015-04-3:
+	- 基本完成glink_FindFrame函数
+*/

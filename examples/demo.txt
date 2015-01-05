@@ -1,0 +1,10 @@
+gcc -c ./osnet/TMSepollserver.c ./osnet/bipbuffer.c ./osnet/ossocket.c 
+ar cqs ./release/libepollserver.a ./osnet/TMSepollserver.o ./osnet/bipbuffer.o ./osnet/ossocket.o
+
+gcc -shared -fPIC -o ./release/libepollserver.so ./osnet/TMSepollserver.o ./osnet/bipbuffer.o ./osnet/ossocket.o /usr/lib/i386-linux-gnu/libpthread.so
+
+/opt/iTop-4412/4.3.2/bin/arm-linux-ar cqs ./release/libepollserver.a ./osnet/TMSepollserver.c ./osnet/bipbuffer.c ./osnet/ossocket.c
+
+
+
+/opt/iTop-4412/4.3.2/bin/arm-linux-gcc -shared -fPIC -o ./release/libepollserver.so ./osnet/TMSepollserver.o ./osnet/bipbuffer.o ./osnet/ossocket.o 

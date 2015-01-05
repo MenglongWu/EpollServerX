@@ -1,0 +1,27 @@
+recv返回-1，查看errno值
+	远端断开连接
+	#define	ECONNRESET	104	/* Connection reset by peer */
+
+	调用一个被关闭的socket，或者不存在的socket
+	#define	EBADF		 9	/* Bad file number */
+
+	连接 保活
+	#define	ETIMEDOUT	110	/* Connection timed out */
+recv返回值
+	0：远端断开连接
+	-1：错误
+	>0：实际接收的数据量
+
+epoll_wait
+	返回-1 errno=4是系统调用(Ctrl+C)
+	如果触发方式是
+
+	epoll_even 1  00 0001
+	epoll_even 25 10 0101
+	epoll_even 17 01 0111
+
+epoll_ctl
+	如果一个socket已经绑定一个struct epoll_event并用epoll_ctl加入int epollfd，那么该socket再绑定另一个struct epoll_event，epoll_ctl将返回-1，错误码
+	#define	EEXIST		17	/* File exists */
+
+

@@ -1,0 +1,62 @@
+﻿/**
+* @mainpage 
+* @author MenglongWu
+* @date 2015-03-20
+* @section 设计原型
+*	- 采用epoll机制做服务器，主要工作负责维护客户端节点链表，通知用户层客户端连接状态，特点：
+		-# epoll拥有自己的线程，一个调试线程、若干个工作线程
+		-# 用户层和分离
+		-# 与协议无关
+*	- 对应用层提供两种调用机制：
+		-# 1.应用层主动查找消息队列，实时性差一些，但工作在用户线程，不会受用户层代码缺陷影响epoll server效率
+		-# 2.epoll server 调用回调函数执行用户层代码，实时性高，工作在epoll server 线程，受用户层代码缺陷影响epoll server效率
+*	- 每个客户端采用类似LWIP的链式缓存方式
+*	- [扩展][验证阶段]epoll除了广泛应用的Socket通信外，实际上还能用于IO驱动，但不能直接拿TCP版的epoll server，待摸索清楚epoll在普通IO文件和Socket下的异同后，再将它们整合，目前已经测试证明epoll可以用于以下设备文件
+		-# 1.串口设备
+		-# 2.管道设备
+
+* @section Examples
+*	- 提供3个历程，运行examples里的Makefile生成
+		-# exam_epollserver.elf：epollserver接口使用，包括回调函数文件ep_examapp.c，主程序文件exam_epollserver.c
+		-# exam_bipbuffer.elf：两段式缓存测试
+		-# exam_tr485.elf：tr485测试程序（未完成）
+*	- 提供1个测试板应用程序
+		-# 运行主目录下的Makefile可生成，如果提示找不到-lreadline等库\n
+		x86平台解压libx86.tar到/usr/local/install文件夹，编译时加入L/usr/local/install/lib\n
+		4412平台解压lib4412.tar到/usr/4412/install文件夹，编译时加入L/usr/4412/install/lib
+		-# 里面使用了MiniShell和readline库，命令表格式参考UBoot，以后会改变命令表格式，这两个库做UI不用管，用于后台调试用
+		-# 命令行
+			-# help：帮助命令
+			-# quit：退出
+			-# connect 127.0.0.1 6000：连接到本地6000端口
+			-# server stop：停止服务
+			-# server run：运行服务
+			-# inf：查看当前的连接信息，分别是序号index、FD文件描述符、本地地址/端口locate、远端地址/端口remote
+			-# epsend 5：向FD为5的设备每秒发送10KB，其中FD通过inf命令查阅，按Ctrl+C停止
+			-# unhook：关闭消息SIGINT的消息钩子，否则在运行epsend后不能按下Ctrl+C退出程序
+
+* @section 实际成果
+	
+
+
+* @section notes Version History
+- V1.0.0_TODO
+	-# 完成TCP框架搭建
+- V1.0.0Bate_20150121
+	-# 完成epoll server TCP客户端状态管理，1000个客户端连接10字节以内小数据量心跳数据异常
+	-# 未添加调试线程，待一段时间测试证明该客户端状态管理的确无漏洞后才加上调试线程，避免故障位置不好定位（究竟是客户端状态管理本身就没做好，还是调试线程带来的新问题）
+	-# 解决数百个客户端同时断开后内存越界问题
+	-# 解决minishell内存越界问题
+	-# 采用libreadline5.0+实现minishell命令历史记录，后期加上命令补全和命令提示功能
+	-# bug服务器与客户端连接，服务器端主动断开存在TIMEOUT计时，证明没有友好的完成4次退出握手，客户端主动退出可以正常释放SOCKET占用情况。以前是没有这个问题的，“解决数百个客户端同时断开”bug而付出的代价，以后会改进
+
+* @section bug
+	- todo more bug
+	- 004-201x-xx-xx:
+	- 004-2015-04-18: bug accept后立即在pFUI_OnAccept里发送数据，导致远端“段错误”，原因由于远端
+	先在pFUI_OnConnect里执行“接收缓存初始化”，如果在未完成“接收缓存初始化”，甚至为调用pFUI_Onconnect前就接收数据，将导致“段错误”，简易应用层pFUI_OnRecv自己检测是否初始化，虽然epollserver也可以检测完成pFUI_OnAccept后才允许调用pFUI_OnRecv，但不是epollserver的义务
+	- 003-2015-04-03: fix 诸多epollserver回调pFUI_xxx函数输入参数全是0问题，之前只留下接口没有具体测试，故意将接口参数全是0，出现bug后方便差错
+	- 002-2015-03-19: bug 连接成功返回0但是仍然显示fd无效Connect: Bad file descriptor
+	- 001-2015-03-19: fix ep_Connect不返回sockfd
+	
+*/

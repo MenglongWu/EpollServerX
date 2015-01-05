@@ -1,0 +1,66 @@
+﻿2015-04-30:
+	- 编写TMSxx函数接口文档注释，doxygen生成
+	
+
+2015-04-29:
+	- 移植TMSxx到4412，并交叉编译libtermcap.so库
+
+2015-04-29:
+	- 移植TMSxx到QT应用程序
+
+2015-04-28:
+	- 编写《TMSxx调试控制台移植到QT步骤.doc》
+
+2015-04-27:
+	- ID_RET_OLP_OP、ID_RET_OLP_OP
+	- 整合ID_CFG_OPM_REF_LEVEL、ID_CFG_OLP_REF_LEVEL
+	- ID_GET_DEVTYPE
+
+2015-04-26:
+	- 编辑《命令解析函数表.xlsx》
+	- 完成封装ID_CFG_MCU_OSW_CYCLE、ID_CFG_OLP_MODE、
+ID_CFG_MCU_OSW_PORT、
+ID_CFG_MCU_OSW_PORT_CLEAR、
+ID_CFG_MCU_OLP_PORT	、
+ID_CFG_MCU_OLP_PORT_CLEAR、
+
+ID_CFG_MCU_U_OPM_OSW	
+ID_CFG_MCU_U_OPM_OSW_CLEAR	
+ID_CFG_MCU_U_OLP_OSW	
+ID_CFG_MCU_U_OLP_OSW_CLEAR	
+
+
+2015-04-25:
+	- 编辑《命令解析函数表.xlsx》
+	- 完成封装ID_CMD_SMS_TEXT、ID_CMD_SMS_ERROR、ID_CFG_SMS、ID_CFG_SMS_CLEAR
+
+
+2015-04-17:
+	- 更新minishell_core，添加sh_editpath
+	- 添加int命令、disp frame命令
+	- 插入其他槽位，仍然检测到插入槽位1，因为热插拔开机后所有引脚没有接触好，电源管脚和地址1管脚在同一侧，导致地址冲突
+2015-04-16:
+	- 刚开始与OPM联调，解决14日所有协议
+2015-04-15:
+	- 刚开始与OPM联调，大部分命令解决，存在某些板卡更换交换机网络不稳定
+2015-04-14:
+	- 主要完成MCU与OPM的通信
+	- 查询版本号ID_GET_VERSION、ID_RET_VERSION
+	- 在线升级ID_UPDATE、ID_CMD_ACK
+	- 返回设备类型信息ID_RET_DEVTYPE（之前已经完成）
+	- 设置参考光功率与告警门限ID_CFG_OPM_REF_LEVEL
+	- 查询各光端口当前功率ID_GET_OPM_OP、ID_RET_OPM_OP
+	-上报光功率告警ID_GET_OPM_OLP_RAYPOWER（之前已完成）
+
+
+
+2015-04-13:
+	- 完成glink_FindFrame函数
+	- 基本完成epFUI_OnRecv，正在提升效率，修订bipbuffer.c
+	- missing 记得处理epFUI_OnRecv函数里当bipbuffer已经满了以后，不能再次recv，也就不能识别远端关闭
+
+2015-04-7~10:
+	- 休息一周
+
+2015-04-3:
+	- 基本完成glink_FindFrame函数
