@@ -43,7 +43,7 @@
 #################################################################
 # CROSS_COMPILE		- While the cross tool link
 # ARCH				- Target platform
-ARCH=x86
+#ARCH=x86
 DEV=MCU
 ifeq ("$(ARCH)", "")
 	ARCH=x86
